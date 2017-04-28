@@ -4,7 +4,7 @@
 // Authors:
 //		Stefan Neubert (2015)
 //		Stephan Richter (2011)
-//		Patrick Lühne (2012)
+//		Patrick Lï¿½hne (2012)
 //
 ///////////////////////////////////////////////////////////////////////////
 
@@ -18,8 +18,10 @@
 #include "framework/DepthCamera.h"
 #include "framework/KinectMotor.h"
 
+using namespace cv;
+
 void Application::processFrame()
-{	
+{
 	///////////////////////////////////////////////////////////////////////////
 	//
 	// To do:
@@ -32,6 +34,24 @@ void Application::processFrame()
 	// * m_outputImage: The image in which you can draw the touch circles.
 	//
 	///////////////////////////////////////////////////////////////////////////
+
+	// first thresholding pass (remove ground)
+	Mat withoutGround;
+	unsigned char thresholdValue = 60; // TODO figure out correct threshold for floor
+	threshold( m_depthImage, withoutGround, threshold_value, 255, THRESH_BINARY);
+
+	// second thresholding pass (remove leg etc.)
+	Mat thresholdedDepth;
+	unsigned char thresholdValue = 128; // TODO figure out correct threshold for leg / higher objects
+	threshold( m_depthImage, thresholdedDepth, threshold_value, 255, THRESH_BINARY);
+
+	// find outlines
+	Mat contours;
+	vector<Vec4i> hierarchy;
+	findContours(thresholdedDepth, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
+
+	// TODO continue with this:
+	// http://docs.opencv.org/2.4.10/doc/tutorials/imgproc/shapedescriptors/bounding_rotated_ellipses/bounding_rotated_ellipses.html
 
 	// Sample code brightening up the depth image to make the values visible
 	m_depthImage *= 10;
