@@ -34,15 +34,16 @@ void Application::processFrame() {
 	//
 	///////////////////////////////////////////////////////////////////////////
 
+	// thresholding vars
+	Mat withoutGround, thresholdedDepth;
+	unsigned char groundThreshold = 60; // TODO figure out correct threshold for floor
+	unsigned char legThreshold = 128; // TODO figure out correct threshold for leg / higher objects
+
 	// first thresholding pass (remove ground)
-	Mat withoutGround;
-	unsigned char thresholdValue = 60; // TODO figure out correct threshold for floor
-	threshold( m_depthImage, withoutGround, thresholdValue, 255, THRESH_BINARY);
+	threshold( m_depthImage, withoutGround, groundThreshold, 255, THRESH_BINARY);
 
 	// second thresholding pass (remove leg etc.)
-	Mat thresholdedDepth;
-	unsigned char thresholdValue = 128; // TODO figure out correct threshold for leg / higher objects
-	threshold( m_depthImage, thresholdedDepth, thresholdValue, 255, THRESH_BINARY);
+	threshold( m_depthImage, thresholdedDepth, legThreshold, 255, THRESH_BINARY);
 
 	// find outlines
 	Mat contours;
@@ -53,8 +54,15 @@ void Application::processFrame() {
 	// TODO continue with this:
 	// http://docs.opencv.org/2.4.10/doc/tutorials/imgproc/shapedescriptors/bounding_rotated_ellipses/bounding_rotated_ellipses.html
 
+	// fit ellipses
+
+	// determine center points
+
+	// draw touch circles into m_outputImage
+
+	// TODO remove
 	// Sample code brightening up the depth image to make the values visible
-	m_depthImage *= 10;
+	// m_depthImage *= 10;
 }
 
 void Application::loop() {
