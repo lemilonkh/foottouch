@@ -6,6 +6,8 @@ class DepthCamera;
 class KinectMotor;
 
 #define DEFAULT_MOTOR_ANGLE 180 // TODO figure out the correct angle to the tripod
+#define IMAGE_HEIGHT 480
+#define IMAGE_WIDTH 640
 
 class Application
 {

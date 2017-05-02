@@ -105,18 +105,22 @@ Application::Application() :
 	cv::namedWindow("bgr", 1);
 
   // create work buffer
-	m_bgrImage = cv::Mat(480, 640, CV_8UC3);
-	m_depthImage = cv::Mat(480, 640, CV_16UC1);
-	m_outputImage = cv::Mat(480, 640, CV_8UC1);
+	m_bgrImage = cv::Mat(IMAGE_HEIGHT, IMAGE_WIDTH, CV_8UC3);
+	m_depthImage = cv::Mat(IMAGE_HEIGHT, IMAGE_WIDTH, CV_16UC1);
+	m_outputImage = cv::Mat(IMAGE_HEIGHT, IMAGE_WIDTH, CV_8UC1);
 
 	// set Kinect LED to yellow
 	m_kinectMotor.setLED(KinectMotor::LED_YELLOW);
 
 	// move motor up and down to see if it works [TODO]
-	for(int i = 0; i <= 360; i++)
+	for(int i = 0; i <= 360; i++) {
 		m_kinectMotor.tiltTo(i);
-	for(int j = 360; j >= 0; j--)
+		delay_ms(20); // TODO use the right function ;)
+	}
+	for(int j = 360; j >= 0; j--) {
 		m_kinectMotor.tiltTo(j);
+		delay_ms(20); // TODO see above
+	}
 
 	// let the motor rest at the default position
 	m_kinectMotor.tiltTo(DEFAULT_MOTOR_ANGLE);
