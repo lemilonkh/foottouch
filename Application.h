@@ -5,6 +5,8 @@
 class DepthCamera;
 class KinectMotor;
 
+#define DEFAULT_MOTOR_ANGLE 180 // TODO figure out the correct angle to the tripod
+
 class Application
 {
 public:
