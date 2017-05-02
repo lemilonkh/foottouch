@@ -20,8 +20,7 @@
 
 using namespace cv;
 
-void Application::processFrame()
-{
+void Application::processFrame() {
 	///////////////////////////////////////////////////////////////////////////
 	//
 	// To do:
@@ -38,17 +37,18 @@ void Application::processFrame()
 	// first thresholding pass (remove ground)
 	Mat withoutGround;
 	unsigned char thresholdValue = 60; // TODO figure out correct threshold for floor
-	threshold( m_depthImage, withoutGround, threshold_value, 255, THRESH_BINARY);
+	threshold( m_depthImage, withoutGround, thresholdValue, 255, THRESH_BINARY);
 
 	// second thresholding pass (remove leg etc.)
 	Mat thresholdedDepth;
 	unsigned char thresholdValue = 128; // TODO figure out correct threshold for leg / higher objects
-	threshold( m_depthImage, thresholdedDepth, threshold_value, 255, THRESH_BINARY);
+	threshold( m_depthImage, thresholdedDepth, thresholdValue, 255, THRESH_BINARY);
 
 	// find outlines
 	Mat contours;
 	vector<Vec4i> hierarchy;
-	findContours(thresholdedDepth, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
+	findContours(thresholdedDepth, contours, hierarchy, CV_RETR_TREE,
+		CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
 
 	// TODO continue with this:
 	// http://docs.opencv.org/2.4.10/doc/tutorials/imgproc/shapedescriptors/bounding_rotated_ellipses/bounding_rotated_ellipses.html
@@ -57,11 +57,9 @@ void Application::processFrame()
 	m_depthImage *= 10;
 }
 
-void Application::loop()
-{
+void Application::loop() {
 	int key = cv::waitKey(20);
-	switch (key)
-	{
+	switch (key) {
 	case 'q': // quit
 		m_isFinished = true;
 		break;
@@ -78,18 +76,16 @@ void Application::loop()
 	cv::imshow("output", m_outputImage);
 }
 
-void Application::makeScreenshots()
-{
+void Application::makeScreenshots() {
 	cv::imwrite("color.png", m_bgrImage);
 	cv::imwrite("depth.png", m_depthImage);
 	cv::imwrite("output.png", m_outputImage);
 }
 
-Application::Application()
-	: m_isFinished(false)
-	, m_depthCamera(nullptr)
-	, m_kinectMotor(nullptr)
-{
+Application::Application() :
+	m_isFinished(false),
+	m_depthCamera(nullptr),
+	m_kinectMotor(nullptr) {
 	// If you want to control the motor / LED
 	// m_kinectMotor = new KinectMotor;
 
@@ -106,13 +102,11 @@ Application::Application()
 	m_outputImage = cv::Mat(480, 640, CV_8UC1);
 }
 
-Application::~Application()
-{
+Application::~Application() {
 	if (m_depthCamera) delete m_depthCamera;
 	if (m_kinectMotor) delete m_kinectMotor;
 }
 
-bool Application::isFinished()
-{
+bool Application::isFinished() {
 	return m_isFinished;
 }
