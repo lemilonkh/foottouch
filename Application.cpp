@@ -41,23 +41,25 @@ void Application::processFrame() {
 	///////////////////////////////////////////////////////////////////////////
 
 	// thresholding vars
-	Mat withoutGround, thresholdedDepth;
-	unsigned char groundThreshold = 60; // TODO figure out correct threshold for floor
-	unsigned char legThreshold = 128; // TODO figure out correct threshold for leg / higher objects
-
+	Mat withoutGround, thresholdedDepth, src;
+	double groundThreshold = 10; // TODO figure out correct threshold for floor
+	double legThreshold = 128; // TODO figure out correct threshold for leg / higher objects
+	double maxValue = 255;
+	m_depthImage.convertTo(src, CV_8UC1, 1.0/256.0, 0);
 	// first thresholding pass (remove ground)
-	threshold( m_depthImage, withoutGround, groundThreshold, 255, THRESH_BINARY);
+	threshold( src, withoutGround, groundThreshold, maxValue, THRESH_BINARY);
 
 	// second thresholding pass (remove leg etc.)
-	threshold( m_depthImage, thresholdedDepth, legThreshold, 255, THRESH_BINARY);
+	threshold( src, thresholdedDepth, legThreshold, maxValue, THRESH_BINARY);
 
 	// find outlines
-	Mat contours;
+	vector<vector<Point> > contours;
 	vector<Vec4i> hierarchy;
 	findContours(thresholdedDepth, contours, hierarchy, CV_RETR_TREE,
 		CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
 
 	// fit ellipses & determine center points
+	vector<RotatedRect> minEllipse( contours.size() );
 	vector<RotatedRect> minEllipses(contours.size());
 	vector<Point2f> centerPoints;
 
@@ -70,7 +72,7 @@ void Application::processFrame() {
 
 	// draw touch circles into m_outputImage
 	for(int i = 0; i < contours.size(); i++) {
-		Scalar color = Scalar(rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255));
+		Scalar color = Scalar(255, 0, 255);
 		drawContours(m_outputImage, contours, i, color, 1, 8, vector<Vec4i>(), 0, Point());
 		ellipse(m_outputImage, minEllipses[i], color, 2, 8);
 		// draw center points (using a crosshair => two lines)
@@ -86,6 +88,8 @@ void Application::processFrame() {
 }
 
 void Application::loop() {
+	try
+	{
 	int key = cv::waitKey(20);
 	switch (key) {
 	case 'q': // quit
@@ -102,6 +106,11 @@ void Application::loop() {
 	cv::imshow("bgr", m_bgrImage);
 	cv::imshow("depth", m_depthImage);
 	cv::imshow("output", m_outputImage);
+	}
+catch ( cv::Exception & e )
+{
+ cerr << e.msg << endl; // output exception message
+}
 }
 
 void Application::makeScreenshots() {
@@ -116,7 +125,8 @@ Application::Application() :
 	m_kinectMotor(nullptr) {
 
 	// connect to Kinect
-	m_kinectMotor = new KinectMotor;
+try
+	{
 	m_depthCamera = new DepthCamera;
 
 	// open windows
@@ -128,12 +138,12 @@ Application::Application() :
 	m_bgrImage = cv::Mat(IMAGE_HEIGHT, IMAGE_WIDTH, CV_8UC3);
 	m_depthImage = cv::Mat(IMAGE_HEIGHT, IMAGE_WIDTH, CV_16UC1);
 	m_outputImage = cv::Mat(IMAGE_HEIGHT, IMAGE_WIDTH, CV_8UC1);
+		}
+catch ( cv::Exception & e )
+{
+ cerr << e.msg << endl; // output exception message
+}
 
-	// set Kinect LED to yellow
-	m_kinectMotor.setLED(KinectMotor::LED_YELLOW);
-
-	// let the motor rest at the default position
-	m_kinectMotor.tiltTo(DEFAULT_MOTOR_ANGLE);
 }
 
 Application::~Application() {
