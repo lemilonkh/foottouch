@@ -51,32 +51,32 @@ void Application::processFrame() {
 	findContours(thresholdedDepth, contours, hierarchy, CV_RETR_TREE,
 		CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
 
-	// TODO continue with this:
-	// http://docs.opencv.org/2.4.10/doc/tutorials/imgproc/shapedescriptors/bounding_rotated_ellipses/bounding_rotated_ellipses.html
-
-	// fit ellipses
+	// fit ellipses & determine center points
 	vector<RotatedRect> minEllipses(contours.size());
+	vector<Point2f> centerPoints;
 
 	for(int i = 0; i < contours.size(); i++) {
-		if(contours[i].size() > 5)
+		if(contours[i].size() > 5) {
 			minEllipses[i] = fitEllipse(Mat(contours[i]));
+			centerPoints[i] = minEllipses[i].center;
+		}
 	}
 
-	// determine center points
-	// TODO
-
 	// draw touch circles into m_outputImage
-	vector<Point> centerPoints;
-
 	for(int i = 0; i < contours.size(); i++) {
 		Scalar color = Scalar(rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255));
 		drawContours(m_outputImage, contours, i, color, 1, 8, vector<Vec4i>(), 0, Point());
 		ellipse(m_outputImage, minEllipses[i], color, 2, 8);
+		// draw center points (using a crosshair => two lines)
+		line(m_outputImage,
+			centerPoints[i] - Point2f(CROSSHAIR_SIZE, 0),
+			centerPoints[i] + Point2f(CROSSHAIR_SIZE, 0),
+			color, 1, 8);
+		line(m_outputImage,
+			centerPoints[i] - Point2f(0, CROSSHAIR_SIZE),
+			centerPoints[i] + Point2f(0, CROSSHAIR_SIZE),
+			color, 1, 8);
 	}
-
-	// TODO remove
-	// Sample code brightening up the depth image to make the values visible
-	// m_depthImage *= 10;
 }
 
 void Application::loop() {
