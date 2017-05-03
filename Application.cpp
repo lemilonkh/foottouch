@@ -55,10 +55,24 @@ void Application::processFrame() {
 	// http://docs.opencv.org/2.4.10/doc/tutorials/imgproc/shapedescriptors/bounding_rotated_ellipses/bounding_rotated_ellipses.html
 
 	// fit ellipses
+	vector<RotatedRect> minEllipses(contours.size());
+
+	for(int i = 0; i < contours.size(); i++) {
+		if(contours[i].size() > 5)
+			minEllipses[i] = fitEllipse(Mat(contours[i]));
+	}
 
 	// determine center points
+	// TODO
 
 	// draw touch circles into m_outputImage
+	vector<Point> centerPoints;
+
+	for(int i = 0; i < contours.size(); i++) {
+		Scalar color = Scalar(rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255));
+		drawContours(m_outputImage, contours, i, color, 1, 8, vector<Vec4i>(), 0, Point());
+		ellipse(m_outputImage, minEllipses[i], color, 2, 8);
+	}
 
 	// TODO remove
 	// Sample code brightening up the depth image to make the values visible
@@ -111,16 +125,6 @@ Application::Application() :
 
 	// set Kinect LED to yellow
 	m_kinectMotor.setLED(KinectMotor::LED_YELLOW);
-
-	// move motor up and down to see if it works [TODO]
-	for(int i = 0; i <= 360; i++) {
-		m_kinectMotor.tiltTo(i);
-		delay_ms(20); // TODO use the right function ;)
-	}
-	for(int j = 360; j >= 0; j--) {
-		m_kinectMotor.tiltTo(j);
-		delay_ms(20); // TODO see above
-	}
 
 	// let the motor rest at the default position
 	m_kinectMotor.tiltTo(DEFAULT_MOTOR_ANGLE);
