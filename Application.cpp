@@ -18,7 +18,13 @@
 #include "framework/DepthCamera.h"
 #include "framework/KinectMotor.h"
 
+using namespace std;
 using namespace cv;
+
+#define DEFAULT_MOTOR_ANGLE 180 // TODO figure out the correct angle to the tripod
+#define IMAGE_HEIGHT 480
+#define IMAGE_WIDTH 640
+#define CROSSHAIR_SIZE 50
 
 void Application::processFrame() {
 	///////////////////////////////////////////////////////////////////////////
