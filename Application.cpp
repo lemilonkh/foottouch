@@ -27,18 +27,10 @@ const int IMAGE_WIDTH = 640;
 const int CROSSHAIR_SIZE = 50;
 
 void Application::processFrame() {
-	///////////////////////////////////////////////////////////////////////////
-	//
-	// To do:
-	//
-	// This method will be called every frame of the camera. Insert code here in
-	// order to fulfill the assignment. These images will help you doing so:
-	//
+	// Used textures:
 	// * m_bgrImage: The image of the Kinect's color camera
 	// * m_depthImage: The image of the Kinects's depth sensor
-	// * m_outputImage: The image in which you can draw the touch circles.
-	//
-	///////////////////////////////////////////////////////////////////////////
+	// * m_outputImage: The image in which you can draw the touch circles
 
 	// thresholding vars
 	m_depthImage *= 2500;
@@ -67,7 +59,7 @@ void Application::processFrame() {
 		if(contours[i].size() > 10) {
 			minEllipses[i] = fitEllipse(Mat(contours[i]));
 			centerPoints[i] = minEllipses[i].center;
-			cout << "in if" << "\n";
+			cout << "inner if" << "\n";
 		}
 		cout << "outter if" << "\n";
 	}
@@ -126,17 +118,17 @@ Application::Application() :
 
 	// connect to Kinect
 	try {
-	m_depthCamera = new DepthCamera;
+		m_depthCamera = new DepthCamera;
 
-	// open windows
-	cv::namedWindow("output", 1);
-	cv::namedWindow("depth", 1);
-	cv::namedWindow("bgr", 1);
+		// open windows
+		cv::namedWindow("output", 1);
+		cv::namedWindow("depth", 1);
+		cv::namedWindow("bgr", 1);
 
-  // create work buffer
-	m_bgrImage = cv::Mat(IMAGE_HEIGHT, IMAGE_WIDTH, CV_8UC3);
-	m_depthImage = cv::Mat(IMAGE_HEIGHT, IMAGE_WIDTH, CV_16UC1);
-	m_outputImage = cv::Mat(IMAGE_HEIGHT, IMAGE_WIDTH, CV_8UC1);
+	  // create work buffer
+		m_bgrImage = cv::Mat(IMAGE_HEIGHT, IMAGE_WIDTH, CV_8UC3);
+		m_depthImage = cv::Mat(IMAGE_HEIGHT, IMAGE_WIDTH, CV_16UC1);
+		m_outputImage = cv::Mat(IMAGE_HEIGHT, IMAGE_WIDTH, CV_8UC1);
 	} catch ( cv::Exception & e ) {
 		cerr << e.msg << endl; // output exception message
 	}
