@@ -33,15 +33,18 @@ void Application::processFrame() {
 	// * m_outputImage: The image in which you can draw the touch circles
 
 	// thresholding vars
-	m_depthImage *= 2500;
 	Mat withoutGround, thresholdedDepth, src;
 	double groundThreshold = 255; // TODO figure out correct threshold for floor
 	double legThreshold = 200; // TODO figure out correct threshold for leg / higher objects
 	double maxValue = 255;
 
+	// Amplify and convert image from 16bit to 8bit
+	m_depthImage *= 2500; // 10
 	m_depthImage.convertTo(src, CV_8UC1, 1.0/256.0, 0);
+
 	// first thresholding pass (remove ground)
 	threshold( src, withoutGround, groundThreshold, maxValue, 1);
+
 	// second thresholding pass (remove leg etc.)
 	threshold( withoutGround, thresholdedDepth, legThreshold, maxValue, 1);
 
@@ -79,7 +82,9 @@ void Application::processFrame() {
 			centerPoints[i] + Point2f(0, CROSSHAIR_SIZE),
 			color, 1, 8);
 	}
-	m_outputImage = withoutGround;
+
+	// TODO remove
+	//m_outputImage = withoutGround;
 }
 
 void Application::loop() {
