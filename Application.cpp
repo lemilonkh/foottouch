@@ -64,7 +64,7 @@ void Application::processFrame() {
 			centerPoints[i] = minEllipses[i].center;
 			cout << "inner if" << "\n";
 		}
-		cout << "outter if" << "\n";
+		cout << "outer if" << "\n";
 	}
 
 	// draw touch circles into m_outputImage
