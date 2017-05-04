@@ -47,12 +47,15 @@ void Application::processFrame() {
 
 	// second thresholding pass (remove leg etc.)
 	threshold(withoutGround, thresholdedDepth, legThreshold, maxValue, THRESH_TRUNC);
-	
+
 	// find outlines
 	vector<vector<Point>> contours;
 	vector<Vec4i> hierarchy;
 	findContours(thresholdedDepth, contours, hierarchy, CV_RETR_TREE,
 		CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
+
+	// add real color image to output
+	m_outputImage = m_bgrImage;
 
 	// fit ellipses & determine center points
 	vector<RotatedRect> minEllipses(contours.size());
@@ -64,9 +67,12 @@ void Application::processFrame() {
 			Point2f currentCenter = minEllipses[i].center;
 			centerPoints.push_back(currentCenter);
 			cout << "Center: " << currentCenter.x << "," << currentCenter.y << "\n";
+
+			// draw contours and ellipses
 			Scalar color = Scalar(255, 0, 255);
 			drawContours(m_outputImage, contours, i, color, 1, 8, vector<Vec4i>(), 0, Point());
 			ellipse(m_outputImage, minEllipses[i], color, 2, 8);
+
 			// draw center points (using a crosshair => two lines)
 			line(m_outputImage,
 				centerPoints[i] - Point2f(CROSSHAIR_SIZE, 0),
@@ -78,8 +84,6 @@ void Application::processFrame() {
 				color, 1, 8);
 			}
 	}
-	
-	// TODO choose correct image
 }
 
 void Application::loop() {
@@ -128,7 +132,7 @@ Application::Application() :
 	  // create work buffer
 		m_bgrImage = cv::Mat(IMAGE_HEIGHT, IMAGE_WIDTH, CV_8UC3);
 		m_depthImage = cv::Mat(IMAGE_HEIGHT, IMAGE_WIDTH, CV_16UC1);
-		m_outputImage = cv::Mat(IMAGE_HEIGHT, IMAGE_WIDTH, CV_8UC1);
+		m_outputImage = cv::Mat(IMAGE_HEIGHT, IMAGE_WIDTH, CV_8UC3);
 	} catch ( cv::Exception & e ) {
 		cerr << e.msg << endl; // output exception message
 	}
