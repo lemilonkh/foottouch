@@ -34,7 +34,7 @@ void Application::processFrame() {
 
 	// thresholding vars
 	Mat withoutGround, thresholdedDepth, src;
-	double groundThreshold = 25; // TODO figure out correct threshold for floor
+	double groundThreshold = 255; // TODO figure out correct threshold for floor
 	double legThreshold = 70; // TODO figure out correct threshold for leg / higher objects
 	double maxValue = 255;
 
@@ -46,7 +46,7 @@ void Application::processFrame() {
 	threshold(src, withoutGround, groundThreshold, maxValue, THRESH_TOZERO_INV);
 
 	// second thresholding pass (remove leg etc.)
-	threshold( withoutGround, thresholdedDepth, legThreshold, maxValue, THRESH_TOZERO);
+	threshold(withoutGround, thresholdedDepth, legThreshold, maxValue, THRESH_TOZERO);
 
 	// find outlines
 	vector<vector<Point>> contours;
@@ -62,16 +62,16 @@ void Application::processFrame() {
 		if(contours[i].size() > 10) {
 			minEllipses[i] = fitEllipse(Mat(contours[i]));
 			centerPoints[i] = minEllipses[i].center;
-			cout << "inner if" << "\n";
+			cout << "Center: " << centerPoints[i].x << "," << centerPoints[i].y << "\n";
 		}
 		cout << "outer if" << "\n";
 	}
 
 	// TODO choose correct image
-	m_outputImage = withoutGround;
+	m_outputImage = thresholdedDepth * 10;
 
 	// draw touch circles into m_outputImage
-	for(int i = 0; i < contours.size(); i++) {
+	/*for(int i = 0; i < contours.size(); i++) {
 		Scalar color = Scalar(255, 0, 255);
 		drawContours(m_outputImage, contours, i, color, 1, 8, vector<Vec4i>(), 0, Point());
 		ellipse(m_outputImage, minEllipses[i], color, 2, 8);
@@ -84,7 +84,7 @@ void Application::processFrame() {
 			centerPoints[i] - Point2f(0, CROSSHAIR_SIZE),
 			centerPoints[i] + Point2f(0, CROSSHAIR_SIZE),
 			color, 1, 8);
-	}
+	}*/
 }
 
 void Application::loop() {
