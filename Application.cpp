@@ -25,6 +25,9 @@ const int DEFAULT_MOTOR_ANGLE = 180; // TODO figure out the correct angle to the
 const int IMAGE_HEIGHT = 480;
 const int IMAGE_WIDTH = 640;
 const int CROSSHAIR_SIZE = 50;
+const int MIN_CONTOUR_SIZE = 20; // TODO figure out, was 10
+const double groundThreshold = 34; // TODO figure out correct threshold for floor
+const double legThreshold = 28; // TODO figure out correct threshold for leg / higher objects
 
 void Application::processFrame() {
 	// Used textures:
@@ -34,8 +37,7 @@ void Application::processFrame() {
 
 	// thresholding vars
 	Mat withoutGround, thresholdedDepth, src;
-	double groundThreshold = 34; // TODO figure out correct threshold for floor
-	double legThreshold = 28; // TODO figure out correct threshold for leg / higher objects
+
 	double maxValue = 255;
 
 	// Amplify and convert image from 16bit to 8bit
@@ -62,7 +64,7 @@ void Application::processFrame() {
 	vector<Point2f> centerPoints(contours.size());
 
 	for(int i = 0; i < contours.size(); i++) {
-		if(contours[i].size() > 10) {
+		if(contours[i].size() > MIN_CONTOUR_SIZE) {
 			minEllipses[i] = fitEllipse(Mat(contours[i]));
 			Point2f currentCenter = minEllipses[i].center;
 			centerPoints.push_back(currentCenter);
