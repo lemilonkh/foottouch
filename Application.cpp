@@ -34,19 +34,19 @@ void Application::processFrame() {
 
 	// thresholding vars
 	Mat withoutGround, thresholdedDepth, src;
-	double groundThreshold = 255; // TODO figure out correct threshold for floor
-	double legThreshold = 200; // TODO figure out correct threshold for leg / higher objects
+	double groundThreshold = 25; // TODO figure out correct threshold for floor
+	double legThreshold = 70; // TODO figure out correct threshold for leg / higher objects
 	double maxValue = 255;
 
 	// Amplify and convert image from 16bit to 8bit
-	m_depthImage *= 2500; // 10
+	m_depthImage *= 10;
 	m_depthImage.convertTo(src, CV_8UC1, 1.0/256.0, 0);
 
 	// first thresholding pass (remove ground)
-	threshold( src, withoutGround, groundThreshold, maxValue, 1);
+	threshold(src, withoutGround, groundThreshold, maxValue, THRESH_TOZERO_INV);
 
 	// second thresholding pass (remove leg etc.)
-	threshold( withoutGround, thresholdedDepth, legThreshold, maxValue, 1);
+	threshold( withoutGround, thresholdedDepth, legThreshold, maxValue, THRESH_TOZERO);
 
 	// find outlines
 	vector<vector<Point>> contours;
@@ -67,6 +67,9 @@ void Application::processFrame() {
 		cout << "outer if" << "\n";
 	}
 
+	// TODO choose correct image
+	m_outputImage = withoutGround;
+
 	// draw touch circles into m_outputImage
 	for(int i = 0; i < contours.size(); i++) {
 		Scalar color = Scalar(255, 0, 255);
@@ -82,9 +85,6 @@ void Application::processFrame() {
 			centerPoints[i] + Point2f(0, CROSSHAIR_SIZE),
 			color, 1, 8);
 	}
-
-	// TODO remove
-	//m_outputImage = withoutGround;
 }
 
 void Application::loop() {
