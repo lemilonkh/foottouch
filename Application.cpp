@@ -62,29 +62,42 @@ void Application::processFrame() {
 	// fit ellipses & determine center points
 	vector<RotatedRect> minEllipses(contours.size());
 	vector<Point2f> centerPoints(contours.size());
+	RotatedRect currentEllipse;
+	Point2f currentCenter;
+	float currentSize;
+	Scalar drawColor;
 
 	for(int i = 0; i < contours.size(); i++) {
-		if(contours[i].size() > MIN_CONTOUR_SIZE) {
-			minEllipses[i] = fitEllipse(Mat(contours[i]));
-			Point2f currentCenter = minEllipses[i].center;
+		currentEllipse = fitEllipse(Mat(contours[i]));
+		currentCenter = currentEllipse.center;
+		currentSize = currentEllipse.size.width * currentEllipse.size.height;
+
+		// filter out too small or too large ellipses
+		if(currentSize > MIN_CONTOUR_SIZE) {
+			minEllipses[i] = currentEllipse;
+
 			centerPoints.push_back(currentCenter);
 			cout << "Center: " << currentCenter.x << "," << currentCenter.y << "\n";
 
-			// draw contours and ellipses
-			Scalar color = Scalar(255, 0, 255);
-			drawContours(m_outputImage, contours, i, color, 1, 8, vector<Vec4i>(), 0, Point());
-			ellipse(m_outputImage, minEllipses[i], color, 2, 8);
+			drawColor = Scalar(0, 255, 50);
+		} else {
+			drawColor = Scalar(255, 0, 0);
+		}
 
-			// draw center points (using a crosshair => two lines)
-			line(m_outputImage,
-				centerPoints[i] - Point2f(CROSSHAIR_SIZE, 0),
-				centerPoints[i] + Point2f(CROSSHAIR_SIZE, 0),
-				color, 1, 8);
-			line(m_outputImage,
-				centerPoints[i] - Point2f(0, CROSSHAIR_SIZE),
-				centerPoints[i] + Point2f(0, CROSSHAIR_SIZE),
-				color, 1, 8);
-			}
+		// draw contours and ellipses
+		drawContours(m_outputImage, contours, i, drawColor, 1, 8, vector<Vec4i>(), 0, Point());
+		ellipse(m_outputImage, minEllipses[i], drawColor, 2, 8);
+
+		// draw center points (using a crosshair => two lines)
+		line(m_outputImage,
+			centerPoints[i] - Point2f(CROSSHAIR_SIZE, 0),
+			centerPoints[i] + Point2f(CROSSHAIR_SIZE, 0),
+			color, 8, 8);
+		line(m_outputImage,
+			centerPoints[i] - Point2f(0, CROSSHAIR_SIZE),
+			centerPoints[i] + Point2f(0, CROSSHAIR_SIZE),
+			color, 8, 8);
+		}
 	}
 }
 
