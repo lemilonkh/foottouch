@@ -21,13 +21,13 @@
 using namespace std;
 using namespace cv;
 
-const int DEFAULT_MOTOR_ANGLE = 180; // TODO figure out the correct angle to the tripod
+const int IMAGE_AMPLIFICATION = 10; // multiplied into the depth texture
 const int IMAGE_HEIGHT = 480;
 const int IMAGE_WIDTH = 640;
 const int CROSSHAIR_SIZE = 50;
-const int MIN_CONTOUR_SIZE = 20; // TODO figure out, was 10
-const double groundThreshold = 34; // TODO figure out correct threshold for floor
-const double legThreshold = 28; // TODO figure out correct threshold for leg / higher objects
+const int MIN_CONTOUR_SIZE = 20; // TODO remove
+const double GROUND_THRESHOLD = 34; // TODO figure out automatically
+const double LEG_THRESHOLD = 28; // TODO figure out automatically
 
 void Application::processFrame() {
 	// Used textures:
@@ -41,14 +41,14 @@ void Application::processFrame() {
 	double maxValue = 255;
 
 	// Amplify and convert image from 16bit to 8bit
-	m_depthImage *= 10;
+	m_depthImage *= IMAGE_AMPLIFICATION;
 	m_depthImage.convertTo(src, CV_8UC1, 1.0/256.0, 0);
 
 	// first thresholding pass (remove ground)
-	threshold(src, withoutGround, groundThreshold, maxValue, THRESH_TOZERO_INV);
+	threshold(src, withoutGround, GROUND_THRESHOLD, maxValue, THRESH_TOZERO_INV);
 
 	// second thresholding pass (remove leg etc.)
-	threshold(withoutGround, thresholdedDepth, legThreshold, maxValue, THRESH_TRUNC);
+	threshold(withoutGround, thresholdedDepth, LEG_THRESHOLD, maxValue, THRESH_TRUNC);
 
 	// find outlines
 	vector<vector<Point>> contours;
