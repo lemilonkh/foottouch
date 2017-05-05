@@ -26,10 +26,10 @@ const int IMAGE_HEIGHT = 480;
 const int IMAGE_WIDTH = 640;
 const int CROSSHAIR_SIZE = 50;
 const int MIN_CONTOUR_POINTS = 10;
-const int MIN_CONTOUR_SIZE = 20;
+const int MIN_CONTOUR_SIZE = 50;
 const int MAX_CONTOUR_SIZE = 100;
-const double GROUND_THRESHOLD = 34; // TODO figure out automatically
-const double LEG_THRESHOLD = 28; // TODO figure out automatically
+const double GROUND_THRESHOLD = 35; // TODO figure out automatically
+const double LEG_THRESHOLD = 33; // TODO figure out automatically
 
 void Application::processFrame() {
 	// Used textures:
@@ -50,7 +50,7 @@ void Application::processFrame() {
 	threshold(src, withoutGround, GROUND_THRESHOLD, maxValue, THRESH_TOZERO_INV);
 
 	// second thresholding pass (remove leg etc.)
-	threshold(withoutGround, thresholdedDepth, LEG_THRESHOLD, maxValue, THRESH_TRUNC);
+	threshold(withoutGround, thresholdedDepth, LEG_THRESHOLD, maxValue, THRESH_TOZERO);
 
 	// find outlines
 	vector<vector<Point>> contours;
