@@ -92,12 +92,11 @@ void Application::processFrame() {
 		line(m_outputImage,
 			centerPoints[i] - Point2f(CROSSHAIR_SIZE, 0),
 			centerPoints[i] + Point2f(CROSSHAIR_SIZE, 0),
-			color, 8, 8);
+			drawColor, 8, 8);
 		line(m_outputImage,
 			centerPoints[i] - Point2f(0, CROSSHAIR_SIZE),
 			centerPoints[i] + Point2f(0, CROSSHAIR_SIZE),
-			color, 8, 8);
-		}
+			drawColor, 8, 8);
 	}
 }
 
