@@ -25,7 +25,9 @@ const int IMAGE_AMPLIFICATION = 10; // multiplied into the depth texture
 const int IMAGE_HEIGHT = 480;
 const int IMAGE_WIDTH = 640;
 const int CROSSHAIR_SIZE = 50;
-const int MIN_CONTOUR_SIZE = 20; // TODO remove
+const int MIN_CONTOUR_POINTS = 10;
+const int MIN_CONTOUR_SIZE = 20;
+const int MAX_CONTOUR_SIZE = 100;
 const double GROUND_THRESHOLD = 34; // TODO figure out automatically
 const double LEG_THRESHOLD = 28; // TODO figure out automatically
 
@@ -68,12 +70,16 @@ void Application::processFrame() {
 	Scalar drawColor;
 
 	for(int i = 0; i < contours.size(); i++) {
+		// don't use too small shapes (point count)
+		if(contours[i].size() < MIN_CONTOUR_POINTS)
+			continue;
+
 		currentEllipse = fitEllipse(Mat(contours[i]));
 		currentCenter = currentEllipse.center;
 		currentSize = currentEllipse.size.width * currentEllipse.size.height;
 
 		// filter out too small or too large ellipses
-		if(currentSize > MIN_CONTOUR_SIZE) {
+		if(currentSize > MIN_CONTOUR_SIZE && currentSize < MAX_CONTOUR_SIZE) {
 			minEllipses[i] = currentEllipse;
 
 			centerPoints.push_back(currentCenter);
