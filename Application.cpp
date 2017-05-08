@@ -52,7 +52,7 @@ void Application::processFrame() {
 	src = min(src, m_calibrationImage);
 
 	// first thresholding pass (remove ground)
-	threshold(src, withoutGround, GROUND_THRESHOLD, maxValue, THRESH_TOZERO_INV);
+	// threshold(src, withoutGround, GROUND_THRESHOLD, maxValue, THRESH_TOZERO_INV);
 
 	// second thresholding pass (remove leg etc.)
 	threshold(withoutGround, thresholdedDepth, LEG_THRESHOLD, maxValue, THRESH_TOZERO);
@@ -149,6 +149,12 @@ void Application::calibrate() {
 	m_depthImage.convertTo(m_calibrationImage, CV_8UC1, 1.0/256.0, 0);
 	m_calibrationImage *= IMAGE_AMPLIFICATION;
 	m_isCalibrated = true;
+
+	double min, max;
+	minMaxLoc(m_calibrationImage, &min, &max);
+	m_groundValue = max;
+
+	cout << "Ground value: " << m_groundValue << endl;
 }
 
 Application::Application() :
@@ -157,6 +163,7 @@ Application::Application() :
 	m_kinectMotor(nullptr) {
 
 	m_isCalibrated = false;
+	m_groundValue = 1.0;
 
 	// connect to Kinect
 	try {
