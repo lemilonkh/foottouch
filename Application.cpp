@@ -108,6 +108,8 @@ void Application::processFrame() {
 
 void Application::loop() {
 	try {
+		m_depthCamera->getFrame(m_bgrImage, m_depthImage);
+
 		int key = cv::waitKey(20);
 		switch (key) {
 		case 'q': // quit
@@ -116,12 +118,14 @@ void Application::loop() {
 		case 's': // screenshot
 			makeScreenshots();
 			break;
+		case ' ': // calibrate
+			calibrate();
+			cout << "Calibrating..." << endl;
 		}
 
-		m_depthCamera->getFrame(m_bgrImage, m_depthImage);
 		processFrame();
 
-		cv::imshow("bgr", m_bgrImage);
+		cv::imshow("calibration", m_calibrationImage);
 		cv::imshow("depth", m_depthImage);
 		cv::imshow("output", m_outputImage);
 	} catch ( cv::Exception & e ) {
@@ -133,6 +137,12 @@ void Application::makeScreenshots() {
 	cv::imwrite("color.png", m_bgrImage);
 	cv::imwrite("depth.png", m_depthImage);
 	cv::imwrite("output.png", m_outputImage);
+}
+
+void Application::calibrate() {
+	// Amplify and convert image from 16bit to 8bit
+	m_calibrationImage = m_depthImage * IMAGE_AMPLIFICATION;
+	m_calibrationImage.convertTo(m_calibrationImage, CV_8UC1, 1.0/256.0, 0);
 }
 
 Application::Application() :
@@ -147,7 +157,7 @@ Application::Application() :
 		// open windows
 		cv::namedWindow("output", 1);
 		cv::namedWindow("depth", 1);
-		cv::namedWindow("bgr", 1);
+		cv::namedWindow("calibration", 1);
 
 	  // create work buffer
 		m_bgrImage = cv::Mat(IMAGE_HEIGHT, IMAGE_WIDTH, CV_8UC3);
