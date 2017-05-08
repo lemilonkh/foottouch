@@ -49,8 +49,8 @@ void Application::processFrame() {
 	m_depthImage *= IMAGE_AMPLIFICATION;
 	m_depthImage.convertTo(src, CV_8UC1, 1.0/256.0, 0);
 
-	src -= m_calibrationImage;
-	/*
+	src = min(src, m_calibrationImage);
+
 	// first thresholding pass (remove ground)
 	threshold(src, withoutGround, GROUND_THRESHOLD, maxValue, THRESH_TOZERO_INV);
 
@@ -108,9 +108,7 @@ void Application::processFrame() {
 			centerPoints[i] - Point2f(0, CROSSHAIR_SIZE),
 			centerPoints[i] + Point2f(0, CROSSHAIR_SIZE),
 			drawColor, 8, 8);
-	}*/
-
-	m_outputImage = src;
+	}
 }
 
 void Application::loop() {
