@@ -141,8 +141,8 @@ void Application::makeScreenshots() {
 
 void Application::calibrate() {
 	// Amplify and convert image from 16bit to 8bit
-	m_calibrationImage = m_depthImage * IMAGE_AMPLIFICATION;
-	m_calibrationImage.convertTo(m_calibrationImage, CV_8UC1, 1.0/256.0, 0);
+	m_depthImage.convertTo(m_calibrationImage, CV_8UC1, 1.0/256.0, 0);
+	m_calibrationImage *= IMAGE_AMPLIFICATION;
 }
 
 Application::Application() :
@@ -163,6 +163,7 @@ Application::Application() :
 		m_bgrImage = cv::Mat(IMAGE_HEIGHT, IMAGE_WIDTH, CV_8UC3);
 		m_depthImage = cv::Mat(IMAGE_HEIGHT, IMAGE_WIDTH, CV_16UC1);
 		m_outputImage = cv::Mat(IMAGE_HEIGHT, IMAGE_WIDTH, CV_8UC3);
+		m_calibrationImage = cv::Mat(IMAGE_HEIGHT, IMAGE_WIDTH, CV_8UC1);
 	} catch ( cv::Exception & e ) {
 		cerr << e.msg << endl; // output exception message
 	}
