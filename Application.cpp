@@ -37,6 +37,9 @@ void Application::processFrame() {
 	// * m_depthImage: The image of the Kinects's depth sensor
 	// * m_outputImage: The image in which you can draw the touch circles
 
+	if(!m_isCalibrated)
+		calibrate();
+
 	// thresholding vars
 	Mat withoutGround, thresholdedDepth, src;
 
@@ -46,6 +49,8 @@ void Application::processFrame() {
 	m_depthImage *= IMAGE_AMPLIFICATION;
 	m_depthImage.convertTo(src, CV_8UC1, 1.0/256.0, 0);
 
+	src -= m_calibrationImage;
+	/*
 	// first thresholding pass (remove ground)
 	threshold(src, withoutGround, GROUND_THRESHOLD, maxValue, THRESH_TOZERO_INV);
 
@@ -103,7 +108,9 @@ void Application::processFrame() {
 			centerPoints[i] - Point2f(0, CROSSHAIR_SIZE),
 			centerPoints[i] + Point2f(0, CROSSHAIR_SIZE),
 			drawColor, 8, 8);
-	}
+	}*/
+
+	m_outputImage = src;
 }
 
 void Application::loop() {
@@ -143,12 +150,15 @@ void Application::calibrate() {
 	// Amplify and convert image from 16bit to 8bit
 	m_depthImage.convertTo(m_calibrationImage, CV_8UC1, 1.0/256.0, 0);
 	m_calibrationImage *= IMAGE_AMPLIFICATION;
+	m_isCalibrated = true;
 }
 
 Application::Application() :
 	m_isFinished(false),
 	m_depthCamera(nullptr),
 	m_kinectMotor(nullptr) {
+
+	m_isCalibrated = false;
 
 	// connect to Kinect
 	try {

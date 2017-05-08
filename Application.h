@@ -31,4 +31,5 @@ protected:
 	cv::Mat m_calibrationImage;
 
 	bool m_isFinished;
+	bool m_isCalibrated;
 };
