@@ -126,6 +126,7 @@ void Application::loop() {
 		case ' ': // calibrate
 			calibrate();
 			cout << "Calibrating..." << endl;
+			cout << "Ground value: " << m_groundValue << endl;
 		}
 
 		processFrame();
@@ -153,8 +154,6 @@ void Application::calibrate() {
 	double min, max;
 	minMaxLoc(m_calibrationImage, &min, &max);
 	m_groundValue = max;
-
-	cout << "Ground value: " << m_groundValue << endl;
 }
 
 Application::Application() :
