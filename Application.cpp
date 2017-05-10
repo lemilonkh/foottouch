@@ -26,7 +26,7 @@ const int IMAGE_HEIGHT = 480;
 const int IMAGE_WIDTH = 640;
 const int CROSSHAIR_SIZE = 50;
 const int MIN_CONTOUR_POINTS = 10;
-const int MIN_ELLIPSE_SIZE = 3000;
+const int OVER_9000 = 9001; //MIN_ELLIPSE_SIZE
 const int MIN_CONTOUR_SIZE = 100;
 const int MAX_CONTOUR_SIZE = 200;
 const double LEG_THRESHOLD = 50; // TODO figure out automatically
@@ -60,12 +60,13 @@ void Application::processFrame() {
 	diff *= 10;
 
 	// thresholding pass (remove leg etc.)
-	threshold(diff, thresholdedDepth, LEG_THRESHOLD, maxValue, THRESH_TOZERO_INV);
+	threshold(diff, withoutGround, LEG_THRESHOLD, maxValue, THRESH_TOZERO_INV);
+	threshold(withoutGround, thresholdedDepth, 20, maxValue, THRESH_TOZERO);
 
 	// find outlines
 	vector<vector<Point>> contours;
 	vector<Vec4i> hierarchy;
-	findContours(diff, contours, hierarchy, CV_RETR_TREE,
+	findContours(thresholdedDepth, contours, hierarchy, CV_RETR_TREE,
 		CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
 
 	// add real color image to output
@@ -91,11 +92,8 @@ void Application::processFrame() {
 		currentCenter = currentEllipse.center;
 		currentSize = currentEllipse.size.width * currentEllipse.size.height;
 
-		// TODO remove
-		//cout << currentSize << endl;
-
 		// filter out too small ellipses
-		if(currentSize > MIN_ELLIPSE_SIZE) {
+		if(currentSize > OVER_9000) {
 			minEllipses[i] = currentEllipse;
 
 			centerPoints.push_back(currentCenter);
@@ -103,9 +101,9 @@ void Application::processFrame() {
 			// TODO remove debug output
 			cout << "Center: " << currentCenter.x << "," << currentCenter.y << "\n";
 
-			drawColor = Scalar(0, 255, 50);
+			drawColor = Scalar(255, 255, 255);
 
-			ellipse(m_outputImage, currentEllipse, drawColor, 2, 8);
+			ellipse(thresholdedDepth, currentEllipse, drawColor, 2, 8);
 		} else {
 			drawColor = Scalar(255, 0, 0);
 		}
