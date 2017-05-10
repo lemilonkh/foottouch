@@ -69,7 +69,7 @@ void Application::processFrame() {
 		CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
 
 	// add real color image to output
-	m_outputImage = m_bgrImage;
+	m_outputImage = thresholdedDepth; // m_bgrImage
 
 	// fit ellipses & determine center points
 	vector<RotatedRect> minEllipses(contours.size());
@@ -125,7 +125,7 @@ void Application::processFrame() {
 			drawColor, 8, 8);
 	}
 
-	m_outputImage = diff;
+	//m_outputImage = diff;
 }
 
 void Application::loop() {
