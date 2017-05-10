@@ -11,6 +11,7 @@
 #include "Application.h"
 
 #include <iostream>
+#include <limits>
 
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -22,6 +23,11 @@
 
 using namespace std;
 using namespace cv;
+
+// fix for max function
+#ifdef max
+#undef max
+#endif
 
 const int IMAGE_AMPLIFICATION = 20; // multiplied into the depth texture
 const int IMAGE_HEIGHT = 480;
@@ -35,8 +41,6 @@ const double LEG_THRESHOLD = 52; // TODO figure out automatically
 const int FRAME_SAMPLING_INTERVAL = 8; // every N frames
 const int CLASSIFICATION_POINT_COUNT = 8;
 const int K_NEIGHBORHOOD_SIZE = 5; // classification used neighbor count (majority vote)
-
-const int INFINITY = std::numeric_limits<int>::max(); // for maximization problems
 
 void Application::processFrame() {
 	// Used textures:
@@ -95,7 +99,7 @@ void Application::processFrame() {
 	double maxEllipseSize = 0.0;
 	Point2f maxEllipseCenter(-1.0, -1.0);
 
-	for(int i = 0; i < contours.size(); i++) {
+	for(auto i = 0u; i < contours.size(); i++) {
 		// don't use too small shapes (point count)
 		if(contours[i].size() < MIN_CONTOUR_POINTS)
 			continue;
@@ -178,7 +182,7 @@ void Application::classifyFootPathAndReset() {
 
 	// transform vector to array
 	float pathArray[CLASSIFICATION_POINT_COUNT*2];
-	for(int i = 0; i < m_footPathPoints.size(); i++) {
+	for(auto i = 0u; i < m_footPathPoints.size(); i++) {
 		pathArray[2*i] = m_footPathPoints[i].x;
 		pathArray[2*i+1] = m_footPathPoints[i].y;
 	}
@@ -199,34 +203,38 @@ void Application::classifyFootPathAndReset() {
 }
 
 void Application::normalizePath() {
-	Point2f min(INFINITY, INFINITY);
-	Point2f max(0.0, 0.0);
+	float inf = numeric_limits<float>::max();
+	Point2f minPoint(int, int);
+	Point2f maxPoint(0.0, 0.0);
 	Point2f current;
 
 	vector<Point2f> transformedPath;
 
-	for(int i = 0; i < m_footPathPoints.size(); i++) {
+	for(auto i = 0u; i < m_footPathPoints.size(); i++) {
 		current = m_footPathPoints[i];
 
-		if(current.x < min.x)
-			min.x = current.x;
-		if(current.y < min.y)
-			min.y = current.y;
+		if(current.x < minPoint.x)
+			minPoint.x = current.x;
+		if(current.y < minPoint.y)
+			minPoint.y = current.y;
 
-		if(current.x > max.x)
-			max.x = current.x;
-		if(current.y > max.y)
-			max.y = current.y;
+		if(current.x > maxPoint.x)
+			maxPoint.x = current.x;
+		if(current.y > maxPoint.y)
+			maxPoint.y = current.y;
 	}
 
-	cout << "Min Point: " << min << endl
-	     << "Max Point: " << max << endl;
+	cout << "Min Point: " << minPoint << endl
+	     << "Max Point: " << maxPoint << endl;
 
 	// normalize whole path into [0,1]^2
 	for(int i = 0; i < m_footPathPoints.size(); i++) {
 		current = m_footPathPoints[i];
-		current -= min;
-		current /= (max - min);
+		current = current - min;
+		Point2f boundingBoxSize = max - min;
+		cout << "Bounding box size: " << boundingBoxSize << endl;
+		current.x /= boundingBoxSize.x;
+		current.y /= boundingBoxSize.y;
 
 		transformedPath.push_back(current);
 	}
