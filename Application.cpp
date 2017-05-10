@@ -21,13 +21,13 @@
 using namespace std;
 using namespace cv;
 
-const int IMAGE_AMPLIFICATION = 10; // multiplied into the depth texture
+const int IMAGE_AMPLIFICATION = 20; // multiplied into the depth texture
 const int IMAGE_HEIGHT = 480;
 const int IMAGE_WIDTH = 640;
 const int CROSSHAIR_SIZE = 50;
 const int MIN_CONTOUR_POINTS = 10;
-const int MIN_CONTOUR_SIZE = 50;
-const int MAX_CONTOUR_SIZE = 100;
+const int MIN_CONTOUR_SIZE = 100;
+const int MAX_CONTOUR_SIZE = 200;
 const double GROUND_THRESHOLD = 35; // TODO figure out automatically
 const double LEG_THRESHOLD = 33; // TODO figure out automatically
 
@@ -41,7 +41,7 @@ void Application::processFrame() {
 		calibrate();
 
 	// thresholding vars
-	Mat withoutGround, thresholdedDepth, src;
+	Mat withoutGround, thresholdedDepth, src, diff;
 
 	double maxValue = 255;
 
@@ -49,22 +49,33 @@ void Application::processFrame() {
 	m_depthImage *= IMAGE_AMPLIFICATION;
 	m_depthImage.convertTo(src, CV_8UC1, 1.0/256.0, 0);
 
-	src = min(src, m_calibrationImage);
+	absdiff(src, m_calibrationImage, diff);
+
+	medianBlur(diff, diff, 25);
+
+	diff *= 10;
+
+	//cout << base << endl;
+
+	bitwise_not(diff, diff);
+	//threshold(diff, diff, 5, maxValue, THRESH_TOZERO);
 
 	// first thresholding pass (remove ground)
-	// threshold(src, withoutGround, GROUND_THRESHOLD, maxValue, THRESH_TOZERO_INV);
+	//threshold(diff, withoutGround, max, maxValue, THRESH_TOZERO_INV);
 
 	// second thresholding pass (remove leg etc.)
-	threshold(withoutGround, thresholdedDepth, LEG_THRESHOLD, maxValue, THRESH_TOZERO);
+	//threshold(withoutGround, thresholdedDepth, max - 5, maxValue, THRESH_TOZERO);
 
 	// find outlines
+	
+	/*
 	vector<vector<Point>> contours;
 	vector<Vec4i> hierarchy;
-	findContours(thresholdedDepth, contours, hierarchy, CV_RETR_TREE,
+	findContours(diff, contours, hierarchy, CV_RETR_TREE,
 		CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
 
 	// add real color image to output
-	m_outputImage = m_bgrImage;
+	//m_outputImage = m_bgrImage;
 
 	// fit ellipses & determine center points
 	vector<RotatedRect> minEllipses(contours.size());
@@ -73,6 +84,8 @@ void Application::processFrame() {
 	Point2f currentCenter;
 	float currentSize;
 	Scalar drawColor;
+
+	//cout << contours.size() << endl;
 
 	for(int i = 0; i < contours.size(); i++) {
 		// don't use too small shapes (point count)
@@ -83,23 +96,29 @@ void Application::processFrame() {
 		currentCenter = currentEllipse.center;
 		currentSize = currentEllipse.size.width * currentEllipse.size.height;
 
+		cout << currentSize << endl;
+
 		// filter out too small or too large ellipses
-		if(currentSize > MIN_CONTOUR_SIZE && currentSize < MAX_CONTOUR_SIZE) {
+		if(currentSize > 3000) {
+		//if(currentSize > MIN_CONTOUR_SIZE && currentSize < MAX_CONTOUR_SIZE) {
 			minEllipses[i] = currentEllipse;
 
 			centerPoints.push_back(currentCenter);
-			cout << "Center: " << currentCenter.x << "," << currentCenter.y << "\n";
+			//cout << "Center: " << currentCenter.x << "," << currentCenter.y << "\n";
 
 			drawColor = Scalar(0, 255, 50);
+
+			ellipse(m_outputImage, currentEllipse, drawColor, 2, 8);
 		} else {
 			drawColor = Scalar(255, 0, 0);
 		}
 
 		// draw contours and ellipses
-		drawContours(m_outputImage, contours, i, drawColor, 1, 8, vector<Vec4i>(), 0, Point());
-		ellipse(m_outputImage, minEllipses[i], drawColor, 2, 8);
+		//drawContours(m_outputImage, contours, i, drawColor, 1, 8, vector<Vec4i>(), 0, Point());
+		//ellipse(m_outputImage, minEllipses[i], drawColor, 2, 8);
 
 		// draw center points (using a crosshair => two lines)
+		/*
 		line(m_outputImage,
 			centerPoints[i] - Point2f(CROSSHAIR_SIZE, 0),
 			centerPoints[i] + Point2f(CROSSHAIR_SIZE, 0),
@@ -109,6 +128,10 @@ void Application::processFrame() {
 			centerPoints[i] + Point2f(0, CROSSHAIR_SIZE),
 			drawColor, 8, 8);
 	}
+	*/
+
+
+	m_outputImage = diff; //thresholdedDepth;// m_outputImage;
 }
 
 void Application::loop() {
@@ -146,15 +169,19 @@ void Application::makeScreenshots() {
 
 void Application::calibrate() {
 	// Amplify and convert image from 16bit to 8bit
+	m_depthImage *= IMAGE_AMPLIFICATION;
 	m_depthImage.convertTo(m_calibrationImage, CV_8UC1, 1.0/256.0, 0);
-	m_calibrationImage *= IMAGE_AMPLIFICATION;
+	
 	m_isCalibrated = true;
+
+	/*
 
 	double min, max;
 	minMaxLoc(m_calibrationImage, &min, &max);
 	m_groundValue = max;
 
 	cout << "Ground value: " << m_groundValue << endl;
+	*/
 }
 
 Application::Application() :
