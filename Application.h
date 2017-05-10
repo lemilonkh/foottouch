@@ -30,8 +30,14 @@ protected:
 	cv::Mat m_outputImage;
 	cv::Mat m_calibrationImage;
 
+	std::vector<cv::Point2f> footPathPoints; // log path that the ellipse center follows
+
 	bool m_isFinished;
 	bool m_isCalibrated;
+
+	bool m_footWasDownLastIteration; // for debouncing
+	bool m_footLiftedLastIteration; // for debouncing
+	unsigned int m_frameCounter; // for time quantization / discretization
 
 	double m_groundValue;
 };

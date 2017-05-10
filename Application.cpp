@@ -30,6 +30,7 @@ const int OVER_9000 = 9001; //MIN_ELLIPSE_SIZE
 const int MIN_CONTOUR_SIZE = 100;
 const int MAX_CONTOUR_SIZE = 200;
 const double LEG_THRESHOLD = 50; // TODO figure out automatically
+const int FRAME_SAMPLING_INTERVAL = 8; // every N
 
 void Application::processFrame() {
 	// Used textures:
@@ -112,18 +113,17 @@ void Application::processFrame() {
 		drawContours(m_outputImage, contours, i, drawColor, 1, 8, vector<Vec4i>(), 0, Point());
 		ellipse(m_outputImage, minEllipses[i], drawColor, 2, 8);
 
-		// draw center points (using a crosshair => two lines)
-		line(m_outputImage,
-			centerPoints[i] - Point2f(CROSSHAIR_SIZE, 0),
-			centerPoints[i] + Point2f(CROSSHAIR_SIZE, 0),
-			drawColor, 8, 8);
-		line(m_outputImage,
-			centerPoints[i] - Point2f(0, CROSSHAIR_SIZE),
-			centerPoints[i] + Point2f(0, CROSSHAIR_SIZE),
-			drawColor, 8, 8);
+		// draw center points (using a crosshair marker)
+		// TODO only compatible with OpenCV3
+		/*cv::drawMarker(m_outputImage,
+			centerPoints[i],
+			drawColor,
+			cv::MARKER_CROSS,
+			20,													// marker size
+			1,													// thickness
+			LineTypes::LINE_8 // was: 8 // line type
+		);*/
 	}
-
-	//m_outputImage = diff;
 }
 
 void Application::loop() {
@@ -178,6 +178,7 @@ Application::Application() :
 	m_kinectMotor(nullptr) {
 
 	m_isCalibrated = false;
+	m_footLiftedLastIteration = false;
 	m_groundValue = 1.0;
 
 	// connect to Kinect
