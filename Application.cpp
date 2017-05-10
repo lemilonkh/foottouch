@@ -26,6 +26,7 @@ const int IMAGE_HEIGHT = 480;
 const int IMAGE_WIDTH = 640;
 const int CROSSHAIR_SIZE = 50;
 const int MIN_CONTOUR_POINTS = 10;
+const int MIN_ELLIPSE_SIZE = 3000;
 const int MIN_CONTOUR_SIZE = 100;
 const int MAX_CONTOUR_SIZE = 200;
 const double GROUND_THRESHOLD = 35; // TODO figure out automatically
@@ -67,15 +68,13 @@ void Application::processFrame() {
 	//threshold(withoutGround, thresholdedDepth, max - 5, maxValue, THRESH_TOZERO);
 
 	// find outlines
-	
-	/*
 	vector<vector<Point>> contours;
 	vector<Vec4i> hierarchy;
 	findContours(diff, contours, hierarchy, CV_RETR_TREE,
 		CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
 
 	// add real color image to output
-	//m_outputImage = m_bgrImage;
+	m_outputImage = m_bgrImage;
 
 	// fit ellipses & determine center points
 	vector<RotatedRect> minEllipses(contours.size());
@@ -85,7 +84,7 @@ void Application::processFrame() {
 	float currentSize;
 	Scalar drawColor;
 
-	//cout << contours.size() << endl;
+	cout << "Found " << contours.size() << " contours!" << endl;
 
 	for(int i = 0; i < contours.size(); i++) {
 		// don't use too small shapes (point count)
@@ -99,7 +98,7 @@ void Application::processFrame() {
 		cout << currentSize << endl;
 
 		// filter out too small or too large ellipses
-		if(currentSize > 3000) {
+		if(currentSize > MIN_ELLIPSE_SIZE) {
 		//if(currentSize > MIN_CONTOUR_SIZE && currentSize < MAX_CONTOUR_SIZE) {
 			minEllipses[i] = currentEllipse;
 
