@@ -18,6 +18,8 @@
 #include "framework/DepthCamera.h"
 #include "framework/KinectMotor.h"
 
+#include "knn.h"
+
 using namespace std;
 using namespace cv;
 
@@ -31,6 +33,8 @@ const int MIN_CONTOUR_SIZE = 100;
 const int MAX_CONTOUR_SIZE = 200;
 const double LEG_THRESHOLD = 52; // TODO figure out automatically
 const int FRAME_SAMPLING_INTERVAL = 8; // every N frames
+const int CLASSIFICATION_POINT_COUNT = 8;
+const int K_NEIGHBORHOOD_SIZE = 5; // classification used neighbor count (majority vote)
 
 void Application::processFrame() {
 	// Used textures:
@@ -146,17 +150,46 @@ void Application::processFrame() {
 		m_frameCounter = 0;
 	  m_footPathPoints.push_back(maxEllipseCenter);
 		cout << "Adding point " << maxEllipseCenter << " to path! #ULTRA" << endl;
+
+		// if there are enough points, start classifying!
+		if(m_footPathPoints.size() >= CLASSIFICATION_POINT_COUNT) {
+			classifyFootPathAndReset();
+		}
 	}
 
 	if(!anyEllipseValid && m_footWasDownLastIteration) {
 		m_footLiftedLastIteration = true;
+		// TODO classify(k, [16 floats (x, y alternating)]);
 	}
 
-	cout << "Frame #"  << m_frameCounter   << " | "
-			 << "Center: " << maxEllipseCenter << " | "
+	cout << "Frame #"  << m_frameCounter   << "\t| "
+			 << "Center: " << maxEllipseCenter << "\t| "
 			 << "Size: "   << maxEllipseSize   << endl;
 
 	m_frameCounter++;
+}
+
+void Application::classifyFootPathAndReset() {
+	assert(m_footPathPoints.size() == CLASSIFICATION_POINT_COUNT);
+
+	// transform vector to array
+	float pathArray[CLASSIFICATION_POINT_COUNT*2];
+	for(int i = 0; i < m_footPathPoints.size(); i++) {
+		pathArray[2*i] = m_footPathPoints[i].x;
+		pathArray[2*i+1] = m_footPathPoints[i].y;
+	}
+
+	cout << "###############" << endl
+	     << "# CLASSIFYING #" << endl
+			 << "###############" << endl;
+	cout << "Path vector: " << m_footPathPoints << endl;
+	cout << "Path array: " << pathArray << endl;
+
+	// run classifier! SCIENCE!
+	int result = classify(K_NEIGHBORHOOD_SIZE, pathArray);
+
+	// clear foot path vector
+	m_footPathPoints.clear();
 }
 
 void Application::loop() {

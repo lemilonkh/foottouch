@@ -16,10 +16,12 @@ public:
 	void processFrame();
 
 	void makeScreenshots();
-	void calibrate();
 	void clearOutputImage();
 
 	bool isFinished();
+
+	void calibrate();
+	void classifyFootPathAndReset();
 
 protected:
 	DepthCamera *m_depthCamera;
