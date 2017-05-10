@@ -58,15 +58,16 @@ void Application::processFrame() {
 
 	//cout << base << endl;
 
-	bitwise_not(diff, diff);
+	//bitwise_not(diff, diff);
 	//threshold(diff, diff, 5, maxValue, THRESH_TOZERO);
 
 	// first thresholding pass (remove ground)
-	//threshold(diff, withoutGround, max, maxValue, THRESH_TOZERO_INV);
+	threshold(diff, diff, 50, maxValue, THRESH_TOZERO_INV);
 
 	// second thresholding pass (remove leg etc.)
 	//threshold(withoutGround, thresholdedDepth, max - 5, maxValue, THRESH_TOZERO);
 
+	/*
 	// find outlines
 	vector<vector<Point>> contours;
 	vector<Vec4i> hierarchy;
@@ -117,7 +118,7 @@ void Application::processFrame() {
 		//ellipse(m_outputImage, minEllipses[i], drawColor, 2, 8);
 
 		// draw center points (using a crosshair => two lines)
-		/*
+		
 		line(m_outputImage,
 			centerPoints[i] - Point2f(CROSSHAIR_SIZE, 0),
 			centerPoints[i] + Point2f(CROSSHAIR_SIZE, 0),
