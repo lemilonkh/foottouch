@@ -107,6 +107,7 @@ void Application::processFrame() {
 		if(currentSize > maxEllipseSize) {
 			m_frameCounter = 0;
 			maxEllipseCenter = currentCenter;
+			maxEllipseSize = currentSize;
 			drawColor = Scalar(0, 255, 255);
 		}
 
