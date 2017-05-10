@@ -30,7 +30,7 @@ protected:
 	cv::Mat m_outputImage;
 	cv::Mat m_calibrationImage;
 
-	std::vector<cv::Point2f> footPathPoints; // log path that the ellipse center follows
+	std::vector<cv::Point2f> m_footPathPoints; // log path that the ellipse center follows
 
 	bool m_isFinished;
 	bool m_isCalibrated;

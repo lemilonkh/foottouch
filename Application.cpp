@@ -26,11 +26,11 @@ const int IMAGE_HEIGHT = 480;
 const int IMAGE_WIDTH = 640;
 const int CROSSHAIR_SIZE = 50;
 const int MIN_CONTOUR_POINTS = 10;
-const int OVER_9000 = 9001; //MIN_ELLIPSE_SIZE
+const int OVER_SIX_THOUSAND = 6001; //MIN_ELLIPSE_SIZE
 const int MIN_CONTOUR_SIZE = 100;
 const int MAX_CONTOUR_SIZE = 200;
-const double LEG_THRESHOLD = 50; // TODO figure out automatically
-const int FRAME_SAMPLING_INTERVAL = 8; // every N
+const double LEG_THRESHOLD = 52; // TODO figure out automatically
+const int FRAME_SAMPLING_INTERVAL = 8; // every N frames
 
 void Application::processFrame() {
 	// Used textures:
@@ -71,7 +71,7 @@ void Application::processFrame() {
 		CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
 
 	// add real color image to output
-	m_outputImage = thresholdedDepth; // m_bgrImage
+	m_outputImage = m_bgrImage; //thresholdedDepth
 
 	// fit ellipses & determine center points
 	vector<RotatedRect> minEllipses(contours.size());
@@ -84,6 +84,11 @@ void Application::processFrame() {
 	// TODO remove debug output
 	cout << "Found " << contours.size() << " contours!" << endl;
 
+	// is there any foot found in this frame?
+	bool anyEllipseValid = false;
+	double maxEllipseSize = 0.0;
+	Point2f maxEllipseCenter(-1.0, -1.0);
+
 	for(int i = 0; i < contours.size(); i++) {
 		// don't use too small shapes (point count)
 		if(contours[i].size() < MIN_CONTOUR_POINTS)
@@ -94,20 +99,27 @@ void Application::processFrame() {
 		currentSize = currentEllipse.size.width * currentEllipse.size.height;
 
 		// filter out too small ellipses
-		if(currentSize > OVER_9000) {
-			minEllipses[i] = currentEllipse;
+		// find ellipse with the maximum size
+		anyEllipseValid = true;
+		m_footWasDownLastIteration = true;
 
-			centerPoints.push_back(currentCenter);
-
-			// TODO remove debug output
-			cout << "Center: " << currentCenter.x << "," << currentCenter.y << "\n";
-
-			drawColor = Scalar(255, 255, 255);
-
-			ellipse(thresholdedDepth, currentEllipse, drawColor, 2, 8);
-		} else {
-			drawColor = Scalar(255, 0, 0);
+		// sample every N frames
+		if(currentSize > maxEllipseSize) {
+			m_frameCounter = 0;
+			maxEllipseCenter = currentCenter;
+			drawColor = Scalar(0, 255, 255);
 		}
+
+		minEllipses[i] = currentEllipse;
+
+		centerPoints.push_back(currentCenter);
+
+		// TODO remove debug output
+		cout << "Center: " << currentCenter.x << "," << currentCenter.y << "\n";
+
+		drawColor = Scalar(255, 255, 255);
+
+		ellipse(thresholdedDepth, currentEllipse, drawColor, 2, 8);
 
 		// draw contours and ellipses
 		drawContours(m_outputImage, contours, i, drawColor, 1, 8, vector<Vec4i>(), 0, Point());
@@ -124,6 +136,27 @@ void Application::processFrame() {
 			LineTypes::LINE_8 // was: 8 // line type
 		);*/
 	}
+
+	// only write to path log if:
+	// * big enough
+	// * enough time has passed
+	// * valid center point was found (not -1 in coords)
+	if(maxEllipseSize > OVER_SIX_THOUSAND &&
+		 m_frameCounter >= FRAME_SAMPLING_INTERVAL
+	   maxEllipseCenter.x >= 0.0 &&
+	   maxEllipseCenter.y >= 0.0) {
+	  m_footPathPoints.push_back(maxEllipseCenter);
+	}
+
+	if(!anyEllipseValid && m_footWasDownLastIteration) {
+		m_footLiftedLastIteration = true;
+	}
+
+	cout << "Frame #"  << m_frameCounter   << " | "
+			 << "Center: " << maxEllipseCenter << " | "
+			 << "Size: "   << maxEllipseSize   << endl;
+
+	m_frameCounter++;
 }
 
 void Application::loop() {
@@ -180,6 +213,7 @@ Application::Application() :
 	m_isCalibrated = false;
 	m_footLiftedLastIteration = false;
 	m_groundValue = 1.0;
+	m_frameCounter = 0;
 
 	// connect to Kinect
 	try {
