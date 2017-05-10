@@ -105,7 +105,6 @@ void Application::processFrame() {
 
 		// sample every N frames
 		if(currentSize > maxEllipseSize) {
-			m_frameCounter = 0;
 			maxEllipseCenter = currentCenter;
 			maxEllipseSize = currentSize;
 			drawColor = Scalar(0, 255, 255);
@@ -142,10 +141,9 @@ void Application::processFrame() {
 	// * big enough
 	// * enough time has passed
 	// * valid center point was found (not -1 in coords)
-	if(maxEllipseSize > OVER_SIX_THOUSAND &&
-		 m_frameCounter >= FRAME_SAMPLING_INTERVAL &&
-	   maxEllipseCenter.x >= 0.0 &&
-	   maxEllipseCenter.y >= 0.0) {
+	if(maxEllipseSize > OVER_SIX_THOUSAND && m_frameCounter >= FRAME_SAMPLING_INTERVAL &&
+	  maxEllipseCenter.x >= 0.0 && maxEllipseCenter.y >= 0.0) {
+		m_frameCounter = 0;
 	  m_footPathPoints.push_back(maxEllipseCenter);
 		cout << "Adding point " << maxEllipseCenter << " to path! #ULTRA" << endl;
 	}
