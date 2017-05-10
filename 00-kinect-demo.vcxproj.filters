@@ -30,6 +30,12 @@
     <ClCompile Include="framework\KinectMotor.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
+    <ClCompile Include="DataSet.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="knn.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h">
@@ -44,5 +50,14 @@
     <ClInclude Include="framework\DepthCameraException.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
+    <ClInclude Include="DataSet.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="knn.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="pendigits.tra" />
   </ItemGroup>
 </Project>

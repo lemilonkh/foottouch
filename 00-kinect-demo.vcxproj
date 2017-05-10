@@ -41,7 +41,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(OPEN_NI_INCLUDE);$(OPENCV_DIR)\..\..\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\local\boost_1_58_0;$(OPEN_NI_INCLUDE);$(OPENCV_DIR)\..\..\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -67,16 +67,23 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
+    <ClCompile Include="DataSet.cpp" />
     <ClCompile Include="framework\DepthCamera.cpp" />
     <ClCompile Include="framework\DepthCameraException.cpp" />
     <ClCompile Include="framework\KinectMotor.cpp" />
+    <ClCompile Include="knn.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
+    <ClInclude Include="DataSet.h" />
     <ClInclude Include="framework\DepthCamera.h" />
     <ClInclude Include="framework\DepthCameraException.h" />
     <ClInclude Include="framework\KinectMotor.h" />
+    <ClInclude Include="knn.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="pendigits.tra" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
