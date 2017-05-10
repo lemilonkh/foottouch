@@ -142,7 +142,7 @@ void Application::processFrame() {
 	// * enough time has passed
 	// * valid center point was found (not -1 in coords)
 	if(maxEllipseSize > OVER_SIX_THOUSAND &&
-		 m_frameCounter >= FRAME_SAMPLING_INTERVAL
+		 m_frameCounter >= FRAME_SAMPLING_INTERVAL &&
 	   maxEllipseCenter.x >= 0.0 &&
 	   maxEllipseCenter.y >= 0.0) {
 	  m_footPathPoints.push_back(maxEllipseCenter);
