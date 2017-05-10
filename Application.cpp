@@ -36,6 +36,8 @@ const int FRAME_SAMPLING_INTERVAL = 8; // every N frames
 const int CLASSIFICATION_POINT_COUNT = 8;
 const int K_NEIGHBORHOOD_SIZE = 5; // classification used neighbor count (majority vote)
 
+const int INFINITY = std::numeric_limits<int>::max(); // for maximization problems
+
 void Application::processFrame() {
 	// Used textures:
 	// * m_bgrImage: The image of the Kinect's color camera
@@ -172,6 +174,8 @@ void Application::processFrame() {
 void Application::classifyFootPathAndReset() {
 	assert(m_footPathPoints.size() == CLASSIFICATION_POINT_COUNT);
 
+	normalizePath();
+
 	// transform vector to array
 	float pathArray[CLASSIFICATION_POINT_COUNT*2];
 	for(int i = 0; i < m_footPathPoints.size(); i++) {
@@ -192,6 +196,42 @@ void Application::classifyFootPathAndReset() {
 
 	// clear foot path vector
 	m_footPathPoints.clear();
+}
+
+void Application::normalizePath() {
+	Point2f min(INFINITY, INFINITY);
+	Point2f max(0.0, 0.0);
+	Point2f current;
+
+	vector<Point2f> transformedPath;
+
+	for(int i = 0; i < m_footPathPoints.size(); i++) {
+		current = m_footPathPoints[i];
+
+		if(current.x < min.x)
+			min.x = current.x;
+		if(current.y < min.y)
+			min.y = current.y;
+
+		if(current.x > max.x)
+			max.x = current.x;
+		if(current.y > max.y)
+			max.y = current.y;
+	}
+
+	cout << "Min Point: " << min << endl
+	     << "Max Point: " << max << endl;
+
+	// normalize whole path into [0,1]^2
+	for(int i = 0; i < m_footPathPoints.size(); i++) {
+		current = m_footPathPoints[i];
+		current -= min;
+		current /= (max - min);
+
+		transformedPath.push_back(current);
+	}
+
+	cout << "Transformed path: " << transformedPath << endl;
 }
 
 void Application::loop() {
