@@ -24,10 +24,14 @@
 using namespace std;
 using namespace cv;
 
-// fix for max function
+// fix for max macro
 #ifdef max
 #undef max
 #endif
+
+#define FOREACH_PATH for(auto i = 0u; i < m_footPathPoints.size(); i++)
+
+#define FOREACH_PATH_WITHOUT_LAST for(auto i = 0u; i < m_footPathPoints.size() - 1; i++)
 
 const int IMAGE_AMPLIFICATION = 20; // multiplied into the depth texture
 const int IMAGE_HEIGHT = 480;
@@ -179,10 +183,11 @@ void Application::classifyFootPathAndReset() {
 	assert(m_footPathPoints.size() == CLASSIFICATION_POINT_COUNT);
 
 	normalizePath();
+	flipCoordinatesForPath();
 
 	// transform vector to array
 	float pathArray[CLASSIFICATION_POINT_COUNT*2];
-	for(auto i = 0u; i < m_footPathPoints.size(); i++) {
+	FOREACH_PATH {
 		pathArray[2*i] = m_footPathPoints[i].x;
 		pathArray[2*i+1] = m_footPathPoints[i].y;
 	}
@@ -202,6 +207,43 @@ void Application::classifyFootPathAndReset() {
 	m_footPathPoints.clear();
 }
 
+// euclidean distance based discretization of the foot path
+void Application::reducePath() {
+	float pathLength = 0.0;
+	Point2f current, next;
+	FOREACH_PATH_WITHOUT_LAST {
+		current = m_footPathPoints[i];
+		next = m_footPathPoints[i+1]; // can be done because the last element isn't iterated over
+		cout << "path reducing in progress" << endl;
+		pathLength += norm(next - current); // calculates euclidean distance between points
+	}
+
+	assert(pathLength > 0.0);
+
+	float pointDist = pathLength / CLASSIFICATION_POINT_COUNT;
+	float travelledDistance = 0.0;
+	vector<Point2f> reducedPath(CLASSIFICATION_POINT_COUNT);
+
+	FOREACH_PATH_WITHOUT_LAST {
+		current = m_footPathPoints[i];
+		next = m_footPathPoints[i+1]; // can be done because the last element isn't iterated over
+		cout << "path reducing in progress" << endl;
+		travelledDistance += norm(next - current); // calculates euclidean distance between points
+
+		if(travelledDistance >= pointDist) {
+			travelledDistance -= pointDist;
+			reducedPath.push_back(current);
+		}
+	}
+
+	// add last point if it isn't already in the path
+	if(reducedPath.size() == 7) {
+		cout << "ReducedPath is one point short!" << endl;
+		cout << "Adding last point " << m_footPathPoints.back() << " to make up for that :8)" << endl;
+		reducedPath.push_back(m_footPathPoints.back());
+	}
+}
+
 void Application::normalizePath() {
 	float inf = numeric_limits<float>::max();
 	Point2f pMin(inf, inf);
@@ -210,7 +252,7 @@ void Application::normalizePath() {
 
 	vector<Point2f> transformedPath;
 
-	for(auto i = 0u; i < m_footPathPoints.size(); i++) {
+	FOREACH_PATH {
 		current = m_footPathPoints[i];
 
 		if(current.x < pMin.x)
@@ -228,7 +270,7 @@ void Application::normalizePath() {
 	     << "Max Point: " << pMax << endl;
 
 	// normalize whole path into [0,1]^2
-	for(auto i = 0u; i < m_footPathPoints.size(); i++) {
+	FOREACH_PATH {
 		current = m_footPathPoints[i];
 		current -= pMin;
 		Point2f boundingBoxSize = pMax - pMin;
@@ -240,6 +282,12 @@ void Application::normalizePath() {
 	}
 
 	cout << "Transformed path: " << transformedPath << endl;
+}
+
+void Application::flipCoordinatesForPath() {
+	FOREACH_PATH {
+		m_footPathPoints[i].y = 1.0 - m_footPathPoints[i].y;
+	}
 }
 
 void Application::loop() {

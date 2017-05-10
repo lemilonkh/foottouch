@@ -21,7 +21,9 @@ public:
 	bool isFinished();
 
 	void calibrate();
+	void reducePath();
 	void normalizePath();
+	void flipCoordinatesForPath();
 	void classifyFootPathAndReset();
 
 protected:
