@@ -188,6 +188,8 @@ void Application::classifyFootPathAndReset() {
 	// run classifier! SCIENCE!
 	int result = classify(K_NEIGHBORHOOD_SIZE, pathArray);
 
+	cout << "OUTPUT: " << result << " --- BOMBAKLAAD!1!" << endl;
+
 	// clear foot path vector
 	m_footPathPoints.clear();
 }
