@@ -29,8 +29,7 @@ const int MIN_CONTOUR_POINTS = 10;
 const int MIN_ELLIPSE_SIZE = 3000;
 const int MIN_CONTOUR_SIZE = 100;
 const int MAX_CONTOUR_SIZE = 200;
-const double GROUND_THRESHOLD = 35; // TODO figure out automatically
-const double LEG_THRESHOLD = 33; // TODO figure out automatically
+const double LEG_THRESHOLD = 50; // TODO figure out automatically
 
 void Application::processFrame() {
 	// Used textures:
@@ -50,24 +49,19 @@ void Application::processFrame() {
 	m_depthImage *= IMAGE_AMPLIFICATION;
 	m_depthImage.convertTo(src, CV_8UC1, 1.0/256.0, 0);
 
+	// removes calibration image from depth image
+	// so only parts that moved since then are still visible
 	absdiff(src, m_calibrationImage, diff);
 
+	// blur to remove artifacts
 	medianBlur(diff, diff, 25);
 
+	// amplify to generate a higher contrast image
 	diff *= 10;
 
-	//cout << base << endl;
+	// thresholding pass (remove leg etc.)
+	threshold(diff, thresholdedDepth, LEG_THRESHOLD, maxValue, THRESH_TOZERO_INV);
 
-	//bitwise_not(diff, diff);
-	//threshold(diff, diff, 5, maxValue, THRESH_TOZERO);
-
-	// first thresholding pass (remove ground)
-	threshold(diff, diff, 50, maxValue, THRESH_TOZERO_INV);
-
-	// second thresholding pass (remove leg etc.)
-	//threshold(withoutGround, thresholdedDepth, max - 5, maxValue, THRESH_TOZERO);
-
-	/*
 	// find outlines
 	vector<vector<Point>> contours;
 	vector<Vec4i> hierarchy;
@@ -85,6 +79,7 @@ void Application::processFrame() {
 	float currentSize;
 	Scalar drawColor;
 
+	// TODO remove debug output
 	cout << "Found " << contours.size() << " contours!" << endl;
 
 	for(int i = 0; i < contours.size(); i++) {
@@ -96,15 +91,17 @@ void Application::processFrame() {
 		currentCenter = currentEllipse.center;
 		currentSize = currentEllipse.size.width * currentEllipse.size.height;
 
-		cout << currentSize << endl;
+		// TODO remove
+		//cout << currentSize << endl;
 
-		// filter out too small or too large ellipses
+		// filter out too small ellipses
 		if(currentSize > MIN_ELLIPSE_SIZE) {
-		//if(currentSize > MIN_CONTOUR_SIZE && currentSize < MAX_CONTOUR_SIZE) {
 			minEllipses[i] = currentEllipse;
 
 			centerPoints.push_back(currentCenter);
-			//cout << "Center: " << currentCenter.x << "," << currentCenter.y << "\n";
+
+			// TODO remove debug output
+			cout << "Center: " << currentCenter.x << "," << currentCenter.y << "\n";
 
 			drawColor = Scalar(0, 255, 50);
 
@@ -114,11 +111,10 @@ void Application::processFrame() {
 		}
 
 		// draw contours and ellipses
-		//drawContours(m_outputImage, contours, i, drawColor, 1, 8, vector<Vec4i>(), 0, Point());
-		//ellipse(m_outputImage, minEllipses[i], drawColor, 2, 8);
+		drawContours(m_outputImage, contours, i, drawColor, 1, 8, vector<Vec4i>(), 0, Point());
+		ellipse(m_outputImage, minEllipses[i], drawColor, 2, 8);
 
 		// draw center points (using a crosshair => two lines)
-		
 		line(m_outputImage,
 			centerPoints[i] - Point2f(CROSSHAIR_SIZE, 0),
 			centerPoints[i] + Point2f(CROSSHAIR_SIZE, 0),
@@ -128,10 +124,8 @@ void Application::processFrame() {
 			centerPoints[i] + Point2f(0, CROSSHAIR_SIZE),
 			drawColor, 8, 8);
 	}
-	*/
 
-
-	m_outputImage = diff; //thresholdedDepth;// m_outputImage;
+	m_outputImage = diff;
 }
 
 void Application::loop() {
@@ -172,7 +166,7 @@ void Application::calibrate() {
 	// Amplify and convert image from 16bit to 8bit
 	m_depthImage *= IMAGE_AMPLIFICATION;
 	m_depthImage.convertTo(m_calibrationImage, CV_8UC1, 1.0/256.0, 0);
-	
+
 	m_isCalibrated = true;
 
 	double min, max;
