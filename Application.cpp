@@ -82,7 +82,7 @@ void Application::processFrame() {
 	Scalar drawColor;
 
 	// TODO remove debug output
-	cout << "Found " << contours.size() << " contours!" << endl;
+	//cout << "Found " << contours.size() << " contours!" << endl;
 
 	// is there any foot found in this frame?
 	bool anyEllipseValid = false;
@@ -115,7 +115,7 @@ void Application::processFrame() {
 		centerPoints.push_back(currentCenter);
 
 		// TODO remove debug output
-		cout << "Center: " << currentCenter.x << "," << currentCenter.y << "\n";
+		//cout << "Center: " << currentCenter.x << "," << currentCenter.y << "\n";
 
 		drawColor = Scalar(255, 255, 255);
 
@@ -146,6 +146,7 @@ void Application::processFrame() {
 	   maxEllipseCenter.x >= 0.0 &&
 	   maxEllipseCenter.y >= 0.0) {
 	  m_footPathPoints.push_back(maxEllipseCenter);
+		cout << "Adding point " << maxEllipseCenter << " to path! #ULTRA" << endl;
 	}
 
 	if(!anyEllipseValid && m_footWasDownLastIteration) {
