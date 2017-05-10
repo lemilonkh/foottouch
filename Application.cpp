@@ -204,8 +204,8 @@ void Application::classifyFootPathAndReset() {
 
 void Application::normalizePath() {
 	float inf = numeric_limits<float>::max();
-	Point2f minPoint(int, int);
-	Point2f maxPoint(0.0, 0.0);
+	Point2f pMin(inf, inf);
+	Point2f pMax(0.0, 0.0);
 	Point2f current;
 
 	vector<Point2f> transformedPath;
@@ -213,25 +213,25 @@ void Application::normalizePath() {
 	for(auto i = 0u; i < m_footPathPoints.size(); i++) {
 		current = m_footPathPoints[i];
 
-		if(current.x < minPoint.x)
-			minPoint.x = current.x;
-		if(current.y < minPoint.y)
-			minPoint.y = current.y;
+		if(current.x < pMin.x)
+			pMin.x = current.x;
+		if(current.y < pMin.y)
+			pMin.y = current.y;
 
-		if(current.x > maxPoint.x)
-			maxPoint.x = current.x;
-		if(current.y > maxPoint.y)
-			maxPoint.y = current.y;
+		if(current.x > pMax.x)
+			pMax.x = current.x;
+		if(current.y > pMax.y)
+			pMax.y = current.y;
 	}
 
-	cout << "Min Point: " << minPoint << endl
-	     << "Max Point: " << maxPoint << endl;
+	cout << "Min Point: " << pMin << endl
+	     << "Max Point: " << pMax << endl;
 
 	// normalize whole path into [0,1]^2
-	for(int i = 0; i < m_footPathPoints.size(); i++) {
+	for(auto i = 0u; i < m_footPathPoints.size(); i++) {
 		current = m_footPathPoints[i];
-		current = current - min;
-		Point2f boundingBoxSize = max - min;
+		current -= pMin;
+		Point2f boundingBoxSize = pMax - pMin;
 		cout << "Bounding box size: " << boundingBoxSize << endl;
 		current.x /= boundingBoxSize.x;
 		current.y /= boundingBoxSize.y;
