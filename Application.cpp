@@ -163,17 +163,16 @@ void Application::processFrame() {
 		cout << "Adding point " << maxEllipseCenter << " to path! #ULTRA" << endl;
 
 		// draw line from last to current point
-		Scalar lineColor(128, 64, 255);
 		if(m_footPathPoints.size() > 1) {
 			arrowedLine(
-				m_drawnLines,
-				lastPoint,
-				maxEllipseCenter,
-				lineColor,
-				5, // line thickness
-				CV_AA, // antialiasing, alternatives: 4 or 8,
-				0, // shift (number of fractional parts)
-				0.25 // arrow tip length in relation to arrow length
+				m_drawnLines,						// line texture
+				lastPoint,							// start point
+				maxEllipseCenter,				// end point
+				Scalar(128, 64, 255),		// line color
+				5,											// line thickness
+				CV_AA,									// antialiasing, alternatives: 4 or 8,
+				0,											// shift (number of fractional parts in input)
+				0.25										// tip length in relation to arrow length
 			);
 		}
 
