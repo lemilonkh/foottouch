@@ -160,7 +160,7 @@ void Application::processFrame() {
 		m_frameCounter = 0;
 		Point2f lastPoint = m_footPathPoints.back();
 	  m_footPathPoints.push_back(maxEllipseCenter);
-		cout << "Adding point " << maxEllipseCenter << " to path! #ULTRA" << endl;
+		cout << "Adding point " << maxEllipseCenter << " to path!" << endl;
 
 		// draw line from last to current point
 		if(m_footPathPoints.size() > 1) {
@@ -219,7 +219,7 @@ void Application::classifyFootPathAndReset() {
 	// run classifier! SCIENCE!
 	int result = classify(K_NEIGHBORHOOD_SIZE, pathArray);
 
-	cout << "OUTPUT: " << result << " --- BOMBAKLAAD!1!" << endl;
+	cout << "OUTPUT: " << result << " --- BOMBACLAAT!" << endl;
 
 	// clear foot path vector
 	m_footPathPoints.clear();
