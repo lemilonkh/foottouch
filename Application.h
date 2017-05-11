@@ -24,6 +24,7 @@ public:
 	void reducePath();
 	void normalizePath();
 	void flipCoordinatesForPath();
+	void clearDrawnLines();
 	void classifyFootPathAndReset();
 
 protected:
@@ -34,6 +35,7 @@ protected:
 	cv::Mat m_depthImage;
 	cv::Mat m_outputImage;
 	cv::Mat m_calibrationImage;
+	cv::Mat m_drawnLines;
 
 	std::vector<cv::Point2f> m_footPathPoints; // log path that the ellipse center follows
 

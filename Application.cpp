@@ -158,8 +158,24 @@ void Application::processFrame() {
 	if(maxEllipseSize > OVER_SIX_THOUSAND && m_frameCounter >= FRAME_SAMPLING_INTERVAL &&
 	  maxEllipseCenter.x >= 0.0 && maxEllipseCenter.y >= 0.0) {
 		m_frameCounter = 0;
+		Point2f lastPoint = m_footPathPoints.back();
 	  m_footPathPoints.push_back(maxEllipseCenter);
 		cout << "Adding point " << maxEllipseCenter << " to path! #ULTRA" << endl;
+
+		// draw line from last to current point
+		Scalar lineColor(128, 64, 255);
+		if(m_footPathPoints.size() > 1) {
+			arrowedLine(
+				m_drawnLines,
+				lastPoint,
+				maxEllipseCenter,
+				lineColor,
+				5, // line thickness
+				CV_AA, // antialiasing, alternatives: 4 or 8,
+				0, // shift (number of fractional parts)
+				0.25 // arrow tip length in relation to arrow length
+			);
+		}
 
 		// if there are enough points, start classifying!
 		if(m_footPathPoints.size() >= CLASSIFICATION_POINT_COUNT) {
@@ -167,13 +183,16 @@ void Application::processFrame() {
 		}
 	}
 
+	// draw line image over output
+	m_outputImage += m_drawnLines;
+
 	if(!anyEllipseValid && m_footWasDownLastIteration) {
 		m_footLiftedLastIteration = true;
 		// TODO classify(k, [16 floats (x, y alternating)]);
 	}
 
-	cout << "Frame #"  << m_frameCounter   << "\t| "
-			 << "Center: " << maxEllipseCenter << "\t| "
+	cout << "Frame #"  << m_frameCounter   << "\t\t| "
+			 << "Center: " << maxEllipseCenter << "\t\t| "
 			 << "Size: "   << maxEllipseSize   << endl;
 
 	m_frameCounter++;
@@ -336,6 +355,10 @@ void Application::calibrate() {
 	m_groundValue = max;
 }
 
+void Application::clearDrawnLines() {
+	m_drawnLines = cv::Mat(IMAGE_HEIGHT, IMAGE_WIDTH, CV_8UC3);
+}
+
 Application::Application() :
 	m_isFinished(false),
 	m_depthCamera(nullptr),
@@ -355,11 +378,13 @@ Application::Application() :
 		cv::namedWindow("depth", 1);
 		cv::namedWindow("calibration", 1);
 
-	  // create work buffer
+	  // create work buffers
 		m_bgrImage = cv::Mat(IMAGE_HEIGHT, IMAGE_WIDTH, CV_8UC3);
 		m_depthImage = cv::Mat(IMAGE_HEIGHT, IMAGE_WIDTH, CV_16UC1);
 		m_outputImage = cv::Mat(IMAGE_HEIGHT, IMAGE_WIDTH, CV_8UC3);
 		m_calibrationImage = cv::Mat(IMAGE_HEIGHT, IMAGE_WIDTH, CV_8UC1);
+
+		clearDrawnLines();
 	} catch ( cv::Exception & e ) {
 		cerr << e.msg << endl; // output exception message
 	}
