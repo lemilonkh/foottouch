@@ -1,10 +1,14 @@
 ///////////////////////////////////////////////////////////////////////////
 //
-// Main class for HCI2 assignments
+// Main class for HCI2 assignments, team Yetiz
+//
 // Authors:
+//		Milan Gruner (2017)
+//		Alec Schneider (2017)
+//		Raoul Baron (2017)
 //		Stefan Neubert (2015)
 //		Stephan Richter (2011)
-//		Patrick L�hne (2012)
+//		Patrick Loehne (2012)
 //
 ///////////////////////////////////////////////////////////////////////////
 
