@@ -162,8 +162,8 @@ void Application::processFrame() {
 	if(maxEllipseSize > OVER_SIX_THOUSAND && m_frameCounter >= FRAME_SAMPLING_INTERVAL &&
 	  maxEllipseCenter.x >= 0.0 && maxEllipseCenter.y >= 0.0) {
 		m_frameCounter = 0;
-		Point2f lastPoint = m_footPathPoints.back();
 	  m_footPathPoints.push_back(maxEllipseCenter);
+		Point2f lastPoint = m_footPathPoints.back();
 		cout << "Adding point " << maxEllipseCenter << " to path!" << endl;
 
 		// draw line from last to current point
@@ -227,6 +227,9 @@ void Application::classifyFootPathAndReset() {
 
 	// clear foot path vector
 	m_footPathPoints.clear();
+
+	// clear drawn line image
+	clearDrawnLines();
 }
 
 // euclidean distance based discretization of the foot path
